@@ -10,27 +10,37 @@ public class Player : MonoBehaviour
     private Vector3 _destination;
     private int _currentLaneIndex;
     [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float jumpForce = 5f;
+    private Rigidbody _rigidbody;
 
 
     private void OnEnable()
     {
         playerInputActions = new PlayerInput();
         playerInputActions?.Enable();
+
+        _rigidbody = GetComponent<Rigidbody>();
         
     }
 
     private void Start()
     {
         playerInputActions.Gameplay.Move.performed += MovePerformed;
+        playerInputActions.Gameplay.Jump.performed += JumpPerformed;
 
         for (int i = 0; i < LaneTranforms.Length; i++)
         {
-            if (LaneTranforms[i].position == transform.position)
+            if (LaneTranforms[i].position.x == transform.position.x)
             {
                 _currentLaneIndex = i;
                 _destination = LaneTranforms[i].position;
             }
         }
+    }
+
+    private void JumpPerformed(InputAction.CallbackContext obj)
+    {
+        _rigidbody?.AddForce(Vector3.up * jumpForce * Time.deltaTime, ForceMode.VelocityChange);
     }
 
     void MovePerformed(InputAction.CallbackContext obj)
@@ -64,7 +74,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        transform.position = Vector3.Lerp(transform.position,_destination,moveSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position,new Vector3(_destination.x,transform.position.y,transform.position.z),moveSpeed * Time.deltaTime);
        
     }
 
